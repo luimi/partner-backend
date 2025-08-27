@@ -1,0 +1,22 @@
+{
+  "name": "partner",
+  "version": "1.0.0",
+  "description": "backend for partner",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dashboard": "source .env && parse-dashboard --dev --appId $PARSE_APPID --masterKey $PARSE_MASTERKEY --serverURL $PARSE_SERVER_URL --appName Partner"
+  },
+  "keywords": [
+    "partner",
+    "backend"
+  ],
+  "author": "lui2mi",
+  "license": "ISC",
+  "dependencies": {
+    "cloudinary": "^2.7.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "parse-server": "^8.2.3"
+  }
+}
