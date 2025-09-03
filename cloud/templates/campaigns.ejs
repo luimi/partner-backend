@@ -1,0 +1,76 @@
+ <style>
+
+    .header {
+        text-align: center;
+        border-bottom: 2px solid #eeeeee;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        color: #333333;
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .report-table th,
+    .report-table td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .report-table th {
+        background-color: #f9f9f9;
+        text-transform: uppercase;
+        color: #555555;
+        font-weight: bold;
+    }
+</style>
+<div class="header">
+    <h1>Monthly Performance Report</h1>
+</div>
+
+<div class="content">
+    <p>Hi <%= username %>,</p>
+    <p>Here is your monthly performance report for your campaigns. Below is a detailed breakdown of key metrics for all your active campaigns during this period.</p>
+</div>
+
+<table class="report-table">
+    <thead>
+        <tr>
+            <th>Campaign Name</th>
+            <th>Views</th>
+            <th>Clicks</th>
+            <th>CTR</th>
+            <th>Unique Users</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% campaigns.forEach((campaign) => { %>
+            <tr>
+                <td><%= campaign.name %></td>
+                <td><%= campaign.views.toLocaleString() %></td>
+                <td><%= campaign.clicks.toLocaleString() %></td>
+                <td><%= campaign.ctr %>%</td>
+                <td><%= campaign.users.toLocaleString() %></td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<div class="content" style="margin-top: 20px;">
+    <p>We hope this information is helpful. For a more detailed report, please visit your dashboard.</p>
+</div>

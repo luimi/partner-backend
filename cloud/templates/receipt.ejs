@@ -1,0 +1,111 @@
+ <style>
+    .info-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .info-section div {
+        flex: 1;
+    }
+
+    .info-section strong {
+        display: block;
+        color: #333333;
+        margin-bottom: 5px;
+    }
+
+    .details-section {
+        border-top: 1px solid #eeeeee;
+        padding-top: 20px;
+    }
+
+    .details-section table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .details-section th,
+    .details-section td {
+        text-align: left;
+        padding: 12px 0;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .details-section th {
+        color: #555555;
+        text-transform: uppercase;
+    }
+
+    .details-section tr:last-child td {
+        border-bottom: none;
+    }
+
+    .totals-section {
+        margin-top: 20px;
+        text-align: right;
+        font-size: 16px;
+    }
+
+    .totals-section p {
+        margin: 5px 0;
+    }
+
+    .totals-section .total {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333333;
+        padding-top: 10px;
+        border-top: 2px solid #eeeeee;
+    }
+
+    @media only screen and (max-width: 400px) {
+        .info-section {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="info-section">
+    <div>
+        <strong>Nit</strong>
+        <p>123456789</p>
+    </div>
+    <div>
+        <strong>Date paid</strong>
+        <p><%= date %></p>
+    </div>
+    <div>
+        <strong>Address</strong>
+        <p><%= address %></p>
+    </div>
+</div>
+
+<div class="details-section">
+    <table>
+        <thead>
+            <tr>
+                <th>Desc.</th>
+                <th>Qty.</th>
+                <th>UP.</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><%= pack %></td>
+                <td>1</td>
+                <td>$<%= price %></td>
+                <td>$<%= price %></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="totals-section">
+    <p>Subtotal: $<%= price %>.00</p>
+    <p class="total">Total: $<%= price %>.00</p>
+</div>

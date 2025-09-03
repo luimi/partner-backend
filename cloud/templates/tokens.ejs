@@ -1,0 +1,67 @@
+ <style>
+    .header {
+        text-align: center;
+        border-bottom: 2px solid #eeeeee;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        color: #333333;
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .balance-info {
+        text-align: center;
+        padding: 20px;
+        background-color: #e6f7ff;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid #b3e0ff;
+    }
+
+    .balance-info p {
+        margin: 0;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .balance-info span {
+        font-size: 36px;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .button-container {
+        text-align: center;
+        margin-top: 30px;
+    }
+</style>
+<div class="header">
+    <h1>Your Token Balance Update</h1>
+</div>
+
+<div class="content">
+    <p>Hi <%= user %>,</p>
+    <p>This is a quick update to let you know about your current token balance. Tokens are used for all our services, so you'll want to make sure you have enough to keep going.</p>
+</div>
+
+<div class="balance-info">
+    <p>Your current token balance is:</p>
+    <span><%= tokens %></span>
+</div>
+
+<div class="content">
+    <p>If you're running low, don't worry! You can easily purchase more tokens from your account dashboard to continue
+        enjoying our services without interruption.</p>
+</div>
+
+<div class="button-container">
+    <a href="https://partner.lui2mi.com//dashboard/tokens" class="button">Buy More Tokens</a>
+</div>
