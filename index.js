@@ -9,7 +9,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_RESTKEY, PARSE_JSKEY, PARSE_SERVER_URL } = process.env;
+const { PORT, PARSE_MONGODB_URI, PARSE_APPID, PARSE_MASTERKEY, PARSE_RESTKEY, PARSE_JSKEY, PARSE_SERVER_URL, PARSE_MASTERKEY_IP } = process.env;
 
 const server = new ParseServer({
     databaseURI: PARSE_MONGODB_URI,
@@ -19,6 +19,7 @@ const server = new ParseServer({
     restAPIKey: PARSE_RESTKEY,
     javascriptKey: PARSE_JSKEY,
     serverURL: PARSE_SERVER_URL,
+    masterKeyIps: [PARSE_MASTERKEY_IP ? `${PARSE_MASTERKEY_IP}` : '0.0.0.0/0'],
     liveQuery: {
         classNames: ['Account']
     }
