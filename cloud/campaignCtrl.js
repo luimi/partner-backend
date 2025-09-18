@@ -15,7 +15,7 @@ exports.uploadImage = async (request) => {
     cloudinary.v2.uploader.upload(
       request.params.image, {}, async (error, result) => {
         if (result) {
-          res({ success: true, url: result.url });
+          res({ success: true, url: result.secure_url });
         } else {
           res({ success: false, message: "Error al intentar guardar la imagen", error: error });
         }
@@ -118,6 +118,8 @@ exports.notifyCampaign = async (request) => {
 }
 
 exports.generateMonthlyReport = async (request) => {
+
+  const { params, headers, log, message } = request;
   
   const today = new Date();
   const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -141,6 +143,7 @@ exports.generateMonthlyReport = async (request) => {
   const userMap = new Map();
 
   // Procesar Views
+  message("Procesando Views")
   views.forEach(view => {
     const campaignId = view.get("campaign").id;
     const userId = view.get("campaign").get("user").id;
@@ -172,6 +175,7 @@ exports.generateMonthlyReport = async (request) => {
   });
 
   // Procesar Clicks
+  message("Procesando Clicks")
   clicks.forEach(click => {
     const campaignId = click.get("campaign").id;
     
@@ -184,6 +188,7 @@ exports.generateMonthlyReport = async (request) => {
   });
 
   // 4. Formatear la salida y calcular el CTR
+  message("Organizando datos")
   const result = [];
   for (const userEntry of userMap.values()) {
     const campaignsArray = [];
@@ -203,13 +208,19 @@ exports.generateMonthlyReport = async (request) => {
       campaigns: campaignsArray
     });
   }
-
-  result.forEach((info) => {
-     emailCtrl.sendCampaigns({
+  message("Enviando Correos")
+  for (let info of result) {
+    await emailCtrl.sendCampaigns({
        to: info.email,
        subject: "Monthly Performance Report",
        username: info.username,
        campaigns: info.campaigns
      })
-  })
+  }
+  message("Eliminando Objetos")
+  Parse.Object.destroyAll(views, {useMasterKey: true}).then((_views) => {
+    Parse.Object.destroyAll(clicks, {useMasterKey: true}).then((_clicks) => {}, (error) => {})
+  }, (error) => { })
+  message(`${result.length} correos enviados`)
+  return
 }
