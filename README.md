@@ -119,7 +119,7 @@ Insert new role "Admin"
 | Name | Type | Class | Default | Required | 
 |--|--|--|--|--|
 | tokens | Number ||0| true|
-| reedimed | Boolean || false| true|
+| redeemed | Boolean || false| true|
 | user| Pointer| _User||false|
 
 ### FAQ
