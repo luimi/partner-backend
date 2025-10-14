@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer")
 const ejs = require('ejs');
 
 const {EMAIL_HOST, EMAIL_PORT, EMAIL_EMAIL, EMAIL_PASSWORD} = process.env
+const emailFrom = `"Partner" <${EMAIL_EMAIL}>`
 
 const transporter = nodemailer.createTransport({
     host: EMAIL_HOST,
@@ -44,7 +45,7 @@ exports.sendReceipt = async ({date, pack, price, to, subject}) => {
   })
   const main = await getTemplate('main', {content: receipt})
   const email = {
-      from: EMAIL_EMAIL,
+      from: emailFrom,
       to: to,
       subject: subject,
       html: main,
@@ -60,7 +61,7 @@ exports.sendCampaign = async ({to, subject, status, title, image}) => {
   })
   const main = await getTemplate('main', {content: campaign})
   const email = {
-      from: EMAIL_EMAIL,
+      from: emailFrom,
       to: to,
       subject: subject,
       html: main,
@@ -75,7 +76,7 @@ exports.sendTokens = async ({to, subject, user, tokens}) => {
   })
   const main = await getTemplate('main', {content: _tokens})
   const email = {
-      from: EMAIL_EMAIL,
+      from: emailFrom,
       to: to,
       subject: subject,
       html: main,
@@ -89,7 +90,7 @@ exports.sendCampaigns = async ({to, subject, username, campaigns}) => {
   })
   const main = await getTemplate('main', {content: content})
   const email = {
-      from: EMAIL_EMAIL,
+      from: emailFrom,
       to: to,
       subject: subject,
       html: main,
