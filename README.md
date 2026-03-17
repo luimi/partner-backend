@@ -83,6 +83,7 @@ Insert new role "Admin"
 |--|--|--|--|--|
 | name | String || | true|
 | code | String || | true|
+| private | Boolean || false | true|
 | deleted| Boolean| |false|true|
 
 ### Campaign
