@@ -3,6 +3,8 @@ const userCtrl = require("./userCtrl")
 const campaignCtrl = require("./campaignCtrl")
 const tokenCtrl = require("./tokenCtrl")
 
+const { PAYMENT_WEBHOOK } = process.env;
+
 Parse.Cloud.define("redeemCoupon", couponCtrl.redeemCoupon ,{
   fields : ['code'],
   requireUser: true
@@ -29,7 +31,7 @@ Parse.Cloud.define("getPaymentLink", tokenCtrl.getPaymentLink,{
   requireUser: true
 });
 
-Parse.Cloud.define("setPaymentUpdate", tokenCtrl.setPaymentUpdate,{
+Parse.Cloud.define(PAYMENT_WEBHOOK || "setPaymentUpdate", tokenCtrl.setPaymentUpdate,{
   fields : ['code', 'transaction', 'status'],
   requireUser: false
 });
