@@ -10,14 +10,16 @@ cloudinary.config({
   api_secret: CLOUDINARY_APISECRET
 });
 
-exports.uploadImage = async (request) => {
+
+
+exports.upload = async (request) => {
   return new Promise((res, rej) => {
     cloudinary.v2.uploader.upload(
-      request.params.image, {}, async (error, result) => {
+      request.params.file, {resource_type: request.params.type}, async (error, result) => {
         if (result) {
           res({ success: true, url: result.secure_url });
         } else {
-          res({ success: false, message: "Error al intentar guardar la imagen", error: error });
+          res({ success: false, message: "Error al intentar guardar el archivo", error: error });
         }
       }
     );
@@ -223,4 +225,19 @@ exports.generateMonthlyReport = async (request) => {
   }, (error) => { })
   message(`${result.length} correos enviados`)
   return
+}
+
+//@deprecated
+exports.uploadImage = async (request) => {
+  return new Promise((res, rej) => {
+    cloudinary.v2.uploader.upload(
+      request.params.image, {}, async (error, result) => {
+        if (result) {
+          res({ success: true, url: result.secure_url });
+        } else {
+          res({ success: false, message: "Error al intentar guardar la imagen", error: error });
+        }
+      }
+    );
+  });
 }

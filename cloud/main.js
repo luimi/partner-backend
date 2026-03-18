@@ -13,8 +13,9 @@ Parse.Cloud.define("googleSignin", userCtrl.googleSignin ,{
   fields : ['id_token'],
   requireUser: false
 });
-Parse.Cloud.define("uploadImage", campaignCtrl.uploadImage,{
-  fields : ['image'],
+
+Parse.Cloud.define("upload", campaignCtrl.upload,{
+  fields : ['file', 'type'],
   requireUser: true
 });
 Parse.Cloud.define("getCampaign", campaignCtrl.getCampaign,{
@@ -47,3 +48,9 @@ Parse.Cloud.define("notifyCampaign", campaignCtrl.notifyCampaign,{
 });
 
 Parse.Cloud.job("generateMonthlyReport", campaignCtrl.generateMonthlyReport)
+
+//@deprecated
+Parse.Cloud.define("uploadImage", campaignCtrl.uploadImage,{
+  fields : ['image'],
+  requireUser: true
+});

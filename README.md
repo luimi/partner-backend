@@ -86,6 +86,16 @@ Insert new role "Admin"
 | private | Boolean || false | true|
 | deleted| Boolean| |false|true|
 
+### Asset
+
+> CLP - Authenticated: Read, Write 
+
+| Name | Type | Class | Default | Required | 
+|--|--|--|--|--|
+| url | String || | true|
+| type | String || | true|
+| deleted| Boolean| |false|true|
+
 ### Campaign
 
 > CLP - Authenticated: Read, Write
