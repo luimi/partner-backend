@@ -2,7 +2,7 @@ require('dotenv').config()
 const cloudinary = require("cloudinary");
 const emailCtrl = require("./emailCtrl");
 
-const {CLOUDINARY_NAME, CLOUDINARY_APIKEY, CLOUDINARY_APISECRET} = process.env;
+const { CLOUDINARY_NAME, CLOUDINARY_APIKEY, CLOUDINARY_APISECRET, CLOUDINARY_FOLDER } = process.env;
 
 cloudinary.config({
   cloud_name: CLOUDINARY_NAME,
@@ -10,14 +10,12 @@ cloudinary.config({
   api_secret: CLOUDINARY_APISECRET
 });
 
-
-
 exports.upload = async (request) => {
   return new Promise((res, rej) => {
     cloudinary.v2.uploader.upload(
-      request.params.file, {resource_type: request.params.type}, async (error, result) => {
+      request.params.file, { resource_type: request.params.type, folder: CLOUDINARY_FOLDER}, async (error, result) => {
         if (result) {
-          res({ success: true, url: result.secure_url });
+          res({ success: true, url: result.secure_url});
         } else {
           res({ success: false, message: "Error al intentar guardar el archivo", error: error });
         }
@@ -27,44 +25,52 @@ exports.upload = async (request) => {
 }
 
 exports.getCampaign = async (request) => {
+  return { success: false, message: "No campaign found" }
+}
+
+exports.getRandomCampaign = async (request) => {
   const { code, id } = request.params;
 
-  const app = await new Parse.Query('Application').equalTo('code', code).first({useMasterKey: true})
+  const app = await new Parse.Query('Application').equalTo('code', code).first({ useMasterKey: true })
+  if (!app) return { success: false, message: "App not found" }
   const accounts = new Parse.Query("Account").greaterThan("balance", 0)
-  const users = new Parse.Query(Parse.User).matchesQuery("account", accounts) 
+  const users = new Parse.Query(Parse.User).matchesQuery("account", accounts)
   const campnaigns = await new Parse.Query('Campaign')
     .equalTo("apps", app)
     .equalTo("status", "Active")
     .equalTo("active", true)
     .matchesQuery("user", users)
-    .find({useMasterKey: true})
-  
-  if(campnaigns.length === 0) {
-    return {success: false, message: "No campaign found"}
+    .find({ useMasterKey: true })
+
+  if (campnaigns.length === 0) {
+    return { success: false, message: "No campaign found" }
   }
-  
+
   const random = Math.floor(Math.random() * campnaigns.length);
   const campaign = campnaigns[random];
-  
+
   campaign.increment('views')
-  campaign.save(null, {useMasterKey: true})
-  
-  const account = await new Parse.Query('Account').equalTo('user', campaign.get('user')).first({useMasterKey: true})
-  account.decrement('balance');
-  account.save(null, {useMasterKey: true})
+  campaign.save(null, { useMasterKey: true })
+
+  const account = await new Parse.Query('Account').equalTo('user', campaign.get('user')).first({ useMasterKey: true })
+  const total = campaign.get('assets').reduce((accumulator, item) => {
+    return accumulator + item.type === 'image' ? 1 : 5;
+  }, 0);
+  account.decrement('balance', parseInt(`${total}`));
+  account.save(null, { useMasterKey: true })
 
   const config = await Parse.Config.get();
   const user = campaign.get('user');
-  await user.fetch({useMasterKey: true});
-  if(user.get("emailLowBalance") && config.get("amounts").includes(account.get("balance"))) {
-   emailCtrl.sendTokens({
-     to: user.get("email"),
-     subject: "Low Balance Alert!",
-     user: user.get("name"), 
-     tokens: account.get("balance")
-   })
+  await user.fetch({ useMasterKey: true });
+  if (user.get("emailLowBalance") && config.get("amounts").includes(account.get("balance"))) {
+    emailCtrl.sendTokens({
+      to: user.get("email"),
+      subject: "Low Balance Alert!",
+      user: user.get("name"),
+      tokens: account.get("balance")
+    })
   }
-  
+
   const view = new Parse.Object('View')
   view.set('app', app)
   view.set('campaign', campaign)
@@ -73,11 +79,11 @@ exports.getCampaign = async (request) => {
   acl.setReadAccess(campaign.get('user'), true)
   acl.setWriteAccess(campaign.get('user'), false)
   view.setACL(acl)
-  view.save(null, {useMasterKey: true})
-  
+  view.save(null, { useMasterKey: true })
+
   return {
-    success: true, 
-    image: campaign.get('image'), 
+    success: true,
+    assets: campaign.get('assets'),
     url: campaign.get('url'),
     campaign: campaign.id
   }
@@ -86,30 +92,30 @@ exports.getCampaign = async (request) => {
 
 exports.clickCampaign = async (request) => {
   const { id } = request.params;
-  const campaign = await new Parse.Query("Campaign").get(id, {useMasterKey: true})
+  const campaign = await new Parse.Query("Campaign").get(id, { useMasterKey: true })
 
-    if(!campaign) {
-      return {success: false, message: 'Campaign does not exists'}
-    }
-    
-    campaign.increment('clicks')
-    campaign.save(null, {useMasterKey: true})
-    
-    const click = new Parse.Object('Click')
-    click.set('campaign', campaign)
-    const acl = new Parse.ACL();
-    acl.setReadAccess(campaign.get('user'), true)
-    acl.setWriteAccess(campaign.get('user'), false)
-    click.setACL(acl)
-    click.save(null, {useMasterKey: true})
-    
-    return {success: true}
+  if (!campaign) {
+    return { success: false, message: 'Campaign does not exists' }
+  }
+
+  campaign.increment('clicks')
+  campaign.save(null, { useMasterKey: true })
+
+  const click = new Parse.Object('Click')
+  click.set('campaign', campaign)
+  const acl = new Parse.ACL();
+  acl.setReadAccess(campaign.get('user'), true)
+  acl.setWriteAccess(campaign.get('user'), false)
+  click.setACL(acl)
+  click.save(null, { useMasterKey: true })
+
+  return { success: true }
 
 }
 
 exports.notifyCampaign = async (request) => {
   const { id } = request.params;
-  const campaign = await new Parse.Query("Campaign").include('user').get(id, {useMasterKey: true})
+  const campaign = await new Parse.Query("Campaign").include('user').get(id, { useMasterKey: true })
   await emailCtrl.sendCampaign({
     to: campaign.get('user').get("email"),
     subject: "Campaign status",
@@ -122,7 +128,7 @@ exports.notifyCampaign = async (request) => {
 exports.generateMonthlyReport = async (request) => {
 
   const { params, headers, log, message } = request;
-  
+
   const today = new Date();
   const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const startOfMonth = lastMonth;
@@ -133,13 +139,13 @@ exports.generateMonthlyReport = async (request) => {
   viewQuery.greaterThanOrEqualTo("createdAt", startOfMonth);
   viewQuery.lessThanOrEqualTo("createdAt", endOfMonth);
   viewQuery.include("campaign.user"); // Incluye los datos del usuario de la campaña
-  const views = await viewQuery.find({useMasterKey: true});
+  const views = await viewQuery.find({ useMasterKey: true });
 
   // 2. Consultar todos los Clicks del mes anterior
   const clickQuery = new Parse.Query("Click");
   clickQuery.greaterThanOrEqualTo("createdAt", startOfMonth);
   clickQuery.lessThanOrEqualTo("createdAt", endOfMonth);
-  const clicks = await clickQuery.find({useMasterKey: true});
+  const clicks = await clickQuery.find({ useMasterKey: true });
 
   // 3. Procesar los datos
   const userMap = new Map();
@@ -152,7 +158,7 @@ exports.generateMonthlyReport = async (request) => {
     const userName = view.get("campaign").get("user").get("name");
     const userEmail = view.get("campaign").get("user").get("email");
     const campaignName = view.get("campaign").get("name");
-    
+
     if (!userMap.has(userId)) {
       userMap.set(userId, {
         username: userName,
@@ -180,7 +186,7 @@ exports.generateMonthlyReport = async (request) => {
   message("Procesando Clicks")
   clicks.forEach(click => {
     const campaignId = click.get("campaign").id;
-    
+
     // Busca la campaña en el mapa de usuarios
     for (const user of userMap.values()) {
       if (user.campaigns.has(campaignId)) {
@@ -213,15 +219,15 @@ exports.generateMonthlyReport = async (request) => {
   message("Enviando Correos")
   for (let info of result) {
     await emailCtrl.sendCampaigns({
-       to: info.email,
-       subject: "Monthly Performance Report",
-       username: info.username,
-       campaigns: info.campaigns
-     })
+      to: info.email,
+      subject: "Monthly Performance Report",
+      username: info.username,
+      campaigns: info.campaigns
+    })
   }
   message("Eliminando Objetos")
-  Parse.Object.destroyAll(views, {useMasterKey: true}).then((_views) => {
-    Parse.Object.destroyAll(clicks, {useMasterKey: true}).then((_clicks) => {}, (error) => {})
+  Parse.Object.destroyAll(views, { useMasterKey: true }).then((_views) => {
+    Parse.Object.destroyAll(clicks, { useMasterKey: true }).then((_clicks) => { }, (error) => { })
   }, (error) => { })
   message(`${result.length} correos enviados`)
   return
