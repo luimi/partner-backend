@@ -105,7 +105,7 @@ Insert new role "Admin"
 | name | String || | true|
 | description | String || | false|
 | url| String| ||false|
-|image|String|||true|
+|assets|array|||true|
 |views|Number||0|true|
 |clicks|Number||0|true|
 |status|String||Pending Review|true|
