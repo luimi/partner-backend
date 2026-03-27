@@ -5,6 +5,7 @@ const tokenCtrl = require("./tokenCtrl")
 
 const { PAYMENT_WEBHOOK } = process.env;
 
+
 Parse.Cloud.define("redeemCoupon", couponCtrl.redeemCoupon ,{
   fields : ['code'],
   requireUser: true
@@ -18,10 +19,12 @@ Parse.Cloud.define("upload", campaignCtrl.upload,{
   fields : ['file', 'type'],
   requireUser: true
 });
-Parse.Cloud.define("getCampaign", campaignCtrl.getCampaign,{
+
+Parse.Cloud.define("getRandomCampaign", campaignCtrl.getRandomCampaign,{
   fields : ['code', 'id'],
   requireUser: false
 });
+
 Parse.Cloud.define("clickCampaign", campaignCtrl.clickCampaign,{
   fields : ['id'],
   requireUser: false
@@ -53,4 +56,8 @@ Parse.Cloud.job("generateMonthlyReport", campaignCtrl.generateMonthlyReport)
 Parse.Cloud.define("uploadImage", campaignCtrl.uploadImage,{
   fields : ['image'],
   requireUser: true
+});
+//@deprecated
+Parse.Cloud.define("getCampaign", campaignCtrl.getCampaign,{
+  requireUser: false
 });
