@@ -12,6 +12,7 @@ npm  i
 .env file
 
 ```enviroment
+PARTNER_ADDRESS="Address"
 PORT=4000
 PARSE_MONGODB_URI="mongodb+srv://user:password@main.abc123.mongodb.net/Main?retryWrites=true&w=majority&appName=Main"
 PARSE_APPID="abcedfghijklmnopqrstuvwxyz"
@@ -27,6 +28,11 @@ EMAIL_HOST="mail.domain.com"
 EMAIL_PORT="465"
 EMAIL_EMAIL="user@domain.com"
 EMAIL_PASSWORD="abcdefg1234567"
+RESEND_KEY="xx_XXXXXXXX_XXXXXXXXXXXXXXXXXXXXXXXX"
+RESEND_EMAIL="partner@domain.com"
+MAILGUN_KEY="00000000000000XX00000000000000000-0000000-00000000"
+MAILGUN_EMAIL="partner@domain.com"
+MAILGUN_DOMAIN="domain.com"
 PAYMENT_METHOD="wompiSandbox";
 PAYMENT_APPID="abcdefghi";
 PAYMENT_URL="https://payment.domain.com"
