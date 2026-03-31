@@ -54,7 +54,7 @@ exports.getRandomCampaign = async (request) => {
 
   const account = await new Parse.Query('Account').equalTo('user', campaign.get('user')).first({ useMasterKey: true })
   const total = campaign.get('assets').reduce((accumulator, item) => {
-    return accumulator + item.type === 'image' ? 1 : 5;
+    return accumulator + (item.type === "image" ? 1 : 5);
   }, 0);
   account.decrement('balance', parseInt(`${total}`));
   account.save(null, { useMasterKey: true })
