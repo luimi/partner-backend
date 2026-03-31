@@ -70,6 +70,7 @@ Insert new role "Admin"
 | emailStatistics | Boolean || true| true|
 | emailLowBalance| Boolean| |true|true|
 | account| Pointer|Account ||false|
+| referredBy| Pointer|User ||false|
 
 ## Classes
 

@@ -3,7 +3,7 @@ require('dotenv').config()
 const {GOOGLE_CLIENTID} = process.env;
 
 exports.googleSignin = async (request) => {
-  const { id_token } = request.params;
+  const { id_token, ref } = request.params;
 
   if (!id_token) {
     throw new Parse.Error(Parse.Error.SCRIPT_FAILED, "El parámetro id_token no fue proporcionado.");
@@ -40,6 +40,11 @@ exports.googleSignin = async (request) => {
       user.set("authData", {
         google: authData,
       });
+      if(ref) {
+        console.log("ref",ref)
+        let refUser = Parse.User.createWithoutData(ref);
+        user.set("referredBy", refUser)
+      }
       user.setACL(acl)
       await user.save(null, {useMasterKey: true});
 
