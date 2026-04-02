@@ -1,6 +1,8 @@
 require('dotenv').config()
 const cloudinary = require("cloudinary");
+const { randomUUID } = require('crypto');
 const emailCtrl = require("./emailCtrl");
+
 
 const { CLOUDINARY_NAME, CLOUDINARY_APIKEY, CLOUDINARY_APISECRET, CLOUDINARY_FOLDER } = process.env;
 
@@ -13,9 +15,9 @@ cloudinary.config({
 exports.upload = async (request) => {
   return new Promise((res, rej) => {
     cloudinary.v2.uploader.upload(
-      request.params.file, { resource_type: request.params.type, folder: CLOUDINARY_FOLDER}, async (error, result) => {
+      request.params.file, { resource_type: request.params.type, folder: CLOUDINARY_FOLDER }, async (error, result) => {
         if (result) {
-          res({ success: true, url: result.secure_url});
+          res({ success: true, url: result.secure_url });
         } else {
           res({ success: false, message: "Error al intentar guardar el archivo", error: error });
         }
@@ -24,8 +26,65 @@ exports.upload = async (request) => {
   });
 }
 
+//@deprecated
 exports.getCampaign = async (request) => {
-  return { success: false, message: "No campaign found" }
+  const { code, id } = request.params;
+
+  const app = await new Parse.Query('Application').equalTo('code', code).first({ useMasterKey: true })
+  if (!app) return { success: false, message: "App not found" }
+  const accounts = new Parse.Query("Account").greaterThan("balance", 0)
+  const users = new Parse.Query(Parse.User).matchesQuery("account", accounts)
+  let campnaigns = await new Parse.Query('Campaign')
+    .equalTo("apps", app)
+    .equalTo("status", "Active")
+    .equalTo("active", true)
+    .matchesQuery("user", users)
+    .find({ useMasterKey: true })
+  if (campnaigns.length > 0) {
+    campnaigns = campnaigns.filter((c) => c.get("assets").length === 1 && c.get("assets")[0].type === "image")
+  }
+  if (campnaigns.length === 0) {
+    return { success: false, message: "No campaign found" }
+  }
+
+  const random = Math.floor(Math.random() * campnaigns.length);
+  const campaign = campnaigns[random];
+
+  campaign.increment('views')
+  campaign.save(null, { useMasterKey: true })
+
+  const account = await new Parse.Query('Account').equalTo('user', campaign.get('user')).first({ useMasterKey: true })
+  account.decrement('balance');
+  account.save(null, { useMasterKey: true })
+
+  const config = await Parse.Config.get();
+  const user = campaign.get('user');
+  await user.fetch({ useMasterKey: true });
+  if (user.get("emailLowBalance") && config.get("amounts").includes(account.get("balance"))) {
+    emailCtrl.sendTokens({
+      to: user.get("email"),
+      subject: "Low Balance Alert!",
+      user: user.get("name"),
+      tokens: account.get("balance")
+    })
+  }
+
+  const view = new Parse.Object('View')
+  view.set('app', app)
+  view.set('campaign', campaign)
+  view.set('user', id || randomUUID())
+  const acl = new Parse.ACL();
+  acl.setReadAccess(campaign.get('user'), true)
+  acl.setWriteAccess(campaign.get('user'), false)
+  view.setACL(acl)
+  view.save(null, { useMasterKey: true })
+
+  return {
+    success: true,
+    image: campaign.get('assets')[0].url,
+    url: campaign.get('url'),
+    campaign: campaign.id
+  }
 }
 
 exports.getRandomCampaign = async (request) => {
