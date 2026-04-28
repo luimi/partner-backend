@@ -8,6 +8,7 @@ const ejs = require('ejs');
 const { EMAIL_HOST, EMAIL_PORT, EMAIL_EMAIL, EMAIL_PASSWORD } = process.env
 const { MAILGUN_KEY, MAILGUN_EMAIL, MAILGUN_DOMAIN } = process.env
 const { RESEND_EMAIL, RESEND_KEY } = process.env
+const { PHPMAILER_URL, PHPMAILER_PASSWORD } = process.env
 const { PARTNER_ADDRESS } = process.env
 
 
@@ -43,6 +44,34 @@ if (MAILGUN_KEY && MAILGUN_DOMAIN && MAILGUN_EMAIL) {
     providers.push({ instance: mg, name: 'mailgun', from })
 }
 
+if (PHPMAILER_URL && PHPMAILER_PASSWORD) {
+    providers.push({
+        instance: {
+            send: async (email) => {
+                const myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+                const urlencoded = new URLSearchParams();
+                urlencoded.append("destinatary", email.to);
+                urlencoded.append("subject", email.subject);
+                urlencoded.append("body", email.html);
+                urlencoded.append("password", PHPMAILER_PASSWORD);
+
+                const requestOptions = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: urlencoded,
+                    redirect: "follow"
+                };
+
+                let result = await fetch(PHPMAILER_URL, requestOptions);
+                result = await result.json();
+                return result;
+            }
+        }, name: 'phpmailer', from: ""
+    })
+}
+
 const getTemplate = (file, info) => {
     return new Promise((res, rej) => {
         ejs.renderFile(__dirname + `/templates/${file}.ejs`, info, async (err, data) => {
@@ -71,6 +100,8 @@ const send = (to, subject, html) => {
                     case 'resend': await provider.instance.emails.send(email);
                         break;
                     case 'mailgun': await provider.instance.messages.create(MAILGUN_DOMAIN, email)
+                        break;
+                    case 'phpmailer': await provider.instance.send(email)
                         break;
                 }
                 sent = true;
