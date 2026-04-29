@@ -126,11 +126,11 @@ exports.sendReceipt = async ({ date, pack, price, to, subject }) => {
     return await send(to, subject, main)
 }
 
-exports.sendCampaign = async ({ to, subject, status, title, image }) => {
+exports.sendCampaign = async ({ to, subject, status, title, assets }) => {
     const campaign = await getTemplate('campaign', {
         status: status,
         title: title,
-        image: image
+        assets: assets
     })
     const main = await getTemplate('main', { content: campaign })
     return await send(to, subject, main)

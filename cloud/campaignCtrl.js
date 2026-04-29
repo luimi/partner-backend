@@ -180,7 +180,7 @@ exports.notifyCampaign = async (request) => {
     subject: "Campaign status",
     status: campaign.get('status') === "Active" ? "accepted" : "rejected",
     title: campaign.get('name'),
-    image: campaign.get('image')
+    assets: campaign.get('assets')
   })
 }
 

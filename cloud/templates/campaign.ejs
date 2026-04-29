@@ -4,53 +4,77 @@
         padding-bottom: 20px;
         margin-bottom: 20px;
     }
+
     .header h1 {
         color: #333333;
         margin: 0;
         font-size: 24px;
     }
+
     .status-section {
         text-align: center;
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 20px;
     }
+
     .status-accepted {
         background-color: #e6f7e6;
         border: 1px solid #c2e0c2;
     }
+
     .status-rejected {
         background-color: #ffe6e6;
         border: 1px solid #ffcccc;
     }
+
     .status-section h2 {
         margin: 0;
         font-size: 20px;
     }
+
     .status-accepted h2 {
         color: #28a745;
     }
+
     .status-rejected h2 {
         color: #dc3545;
     }
+
     .details-section {
         border-top: 1px solid #eeeeee;
         padding-top: 20px;
         margin-bottom: 20px;
     }
+
     .details-section h3 {
         margin-top: 0;
         color: #555555;
     }
+
     .details-section p {
         margin: 5px 0;
         font-size: 14px;
     }
+
     .details-section img {
         max-width: 100%;
         height: auto;
         border-radius: 4px;
         margin-top: 10px;
+    }
+
+    .image-container {
+        width: 150px;
+        height: 150px;
+        overflow: hidden;
+    }
+
+    .image-container .preview {
+        display: block;
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
     }
 </style>
 <div class="header">
@@ -58,18 +82,46 @@
 </div>
 
 <div class="status-section status-<%= status %>">
-  <% if(status === 'accepted') { %>
-    <h2>Your Campaign Has Been Approved!</h2>
-    <p>Congratulations! Your campaign is now live and running.</p>
-  <% } else { %>
-    <h2>Your Campaign Has Been Rejected</h2>
-    <p>We're sorry, but your campaign could not be approved. Please review our <a href="https://english.stackexchange.com/questions/380122/guidelines-for-vs-guidelines-to" style="color:#dc3545; text-decoration: underline; font-weight: bold;">content policies</a> and make the necessary changes.</p>
-  <% } %>
+    <% if(status==='accepted' ) { %>
+        <h2>Your Campaign Has Been Approved!</h2>
+        <p>Congratulations! Your campaign is now live and running.</p>
+        <% } else { %>
+            <h2>Your Campaign Has Been Rejected</h2>
+            <p>We're sorry, but your campaign could not be approved. Please review our <a
+                    href="https://english.stackexchange.com/questions/380122/guidelines-for-vs-guidelines-to"
+                    style="color:#dc3545; text-decoration: underline; font-weight: bold;">content policies</a> and
+                make the necessary changes.</p>
+            <% } %>
 </div>
 
 <div class="details-section">
     <h3>Campaign Details</h3>
-    <p><strong>Title:</strong> <%= title %></p>
-    <p><strong>Image:</strong></p>
-    <img src="<%= image %>" alt="Campaign Image">
+    <p><strong>Title:</strong>
+        <%= title %>
+    </p>
+    <p><strong>Assets:</strong></p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+        <% const cols=3; %>
+
+            <% assets.forEach((item, index)=> { %>
+                <% if (index % cols===0) { %>
+                    <tr>
+                        <% } %>
+                            <td align="center" valign="middle" width="150" height="150" class="image-container">
+
+                                <% if (item.type==='video' ) { %>
+                                    <img src="<%= item.url %>" width="150" height="150" class="preview">
+                                    <% } else { %>
+                                        <img src="<%= item.url %>" width="150" height="150" class="preview">
+                                        <% } %>
+                            </td>
+                            <% if (index % cols===cols - 1) { %>
+                    </tr>
+                    <% } %>
+                        <% }) %>
+                            <% if (assets.length % cols !==0) { %>
+                                </tr>
+                                <% } %>
+
+    </table>
 </div>
