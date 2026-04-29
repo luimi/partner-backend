@@ -121,7 +121,7 @@ exports.getRandomCampaign = async (request) => {
   const config = await Parse.Config.get();
   const user = campaign.get('user');
   await user.fetch({ useMasterKey: true });
-  if (user.get("emailLowBalance") && config.get("amounts").includes(account.get("balance"))) {
+  if (user.get("emailLowBalance") && (config.get("amounts").includes(account.get("balance")) || account.get("balance") <= 0)) {
     emailCtrl.sendTokens({
       to: user.get("email"),
       subject: "Low Balance Alert!",
