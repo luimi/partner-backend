@@ -189,22 +189,22 @@ exports.generateMonthlyReport = async (request) => {
   const { params, headers, log, message } = request;
 
   const today = new Date();
-  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1, 0, 0, 0, 0);
   const startOfMonth = lastMonth;
-  const endOfMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
 
   // 1. Consultar todos los Views del mes anterior
   const viewQuery = new Parse.Query("View");
   viewQuery.greaterThanOrEqualTo("createdAt", startOfMonth);
   viewQuery.lessThanOrEqualTo("createdAt", endOfMonth);
   viewQuery.include("campaign.user"); // Incluye los datos del usuario de la campaña
-  const views = await viewQuery.find({ useMasterKey: true });
+  const views = await viewQuery.limit(Number.MAX_SAFE_INTEGER).find({ useMasterKey: true });
 
   // 2. Consultar todos los Clicks del mes anterior
   const clickQuery = new Parse.Query("Click");
   clickQuery.greaterThanOrEqualTo("createdAt", startOfMonth);
   clickQuery.lessThanOrEqualTo("createdAt", endOfMonth);
-  const clicks = await clickQuery.find({ useMasterKey: true });
+  const clicks = await clickQuery.limit(Number.MAX_SAFE_INTEGER).find({ useMasterKey: true });
 
   // 3. Procesar los datos
   const userMap = new Map();
