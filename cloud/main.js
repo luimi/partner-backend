@@ -16,7 +16,7 @@ Parse.Cloud.define("googleSignin", userCtrl.googleSignin ,{
 });
 
 Parse.Cloud.define("upload", campaignCtrl.upload,{
-  fields : ['file', 'type'],
+  fields : ['file', 'type', 'name'],
   requireUser: true
 });
 

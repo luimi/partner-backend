@@ -3,26 +3,64 @@ const cloudinary = require("cloudinary");
 const { randomUUID } = require('crypto');
 const emailCtrl = require("./emailCtrl");
 
-
+let provider;
 const { CLOUDINARY_NAME, CLOUDINARY_APIKEY, CLOUDINARY_APISECRET, CLOUDINARY_FOLDER } = process.env;
+const { PHPMEDIA_URL, PHPMEDIA_PASSWORD } = process.env;
 
-cloudinary.config({
-  cloud_name: CLOUDINARY_NAME,
-  api_key: CLOUDINARY_APIKEY,
-  api_secret: CLOUDINARY_APISECRET
-});
+if (CLOUDINARY_NAME && CLOUDINARY_APIKEY && CLOUDINARY_APISECRET && CLOUDINARY_FOLDER) {
+  cloudinary.config({
+    cloud_name: CLOUDINARY_NAME,
+    api_key: CLOUDINARY_APIKEY,
+    api_secret: CLOUDINARY_APISECRET
+  });
+  provider = "cloudinary";
+}
+
+if (PHPMEDIA_URL && PHPMEDIA_PASSWORD) {
+  provider = "phpmedia";
+}
+
 
 exports.upload = async (request) => {
-  return new Promise((res, rej) => {
-    cloudinary.v2.uploader.upload(
-      request.params.file, { resource_type: request.params.type, folder: CLOUDINARY_FOLDER }, async (error, result) => {
-        if (result) {
-          res({ success: true, url: result.secure_url });
-        } else {
-          res({ success: false, message: "Error al intentar guardar el archivo", error: error });
-        }
-      }
-    );
+  return new Promise(async (res, rej) => {
+    if (!provider) {
+      res({ success: false, message: "No hay proveedores disponibles" });
+      return;
+    }
+    switch (provider) {
+      case "cloudinary":
+        cloudinary.v2.uploader.upload(
+          request.params.file, { resource_type: request.params.type, folder: CLOUDINARY_FOLDER }, async (error, result) => {
+            if (result) {
+              res({ success: true, url: result.secure_url });
+            } else {
+              res({ success: false, message: "Error al intentar guardar el archivo", error: error });
+            }
+          }
+        );
+        break;
+      case "phpmedia":
+        const response = await fetch(request.params.file);
+        const blob = await response.blob();
+        const formdata = new FormData();
+        formdata.append("file", blob, request.params.name);
+        formdata.append("password", PHPMEDIA_PASSWORD);
+
+        const requestOptions = {
+          method: "POST",
+          body: formdata,
+          redirect: "follow"
+        };
+
+        fetch(PHPMEDIA_URL, requestOptions)
+          .then((response) => response.json())
+          .then((result) => {
+            console.log(result)
+            res({ success: result.success, url: result.path, message: result.message })
+          })
+          .catch((error) => res({ success: false, message: error.message }));
+        break;
+    }
   });
 }
 
